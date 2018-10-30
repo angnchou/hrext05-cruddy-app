@@ -5,6 +5,11 @@
 - [ ] create indivdiual items
 - [ ] delete individual items
 - [ ] edit individual items
+* Basic requirements planning:
+  * add feature to create multiple notes; create title and note input fields ~ 3 hour
+  * add feature to delete multiple notes ~ 3 hours
+  * add feature to edit note; edit individual note at a time only ~ 5 hours
+
 
 ##### Notes
 - [ ] Keep DOM and localStorage matching 
@@ -32,4 +37,10 @@
 - [ ] bootstrap/material (css library)
 
 #### My Spin
-(to be filled out by you)
+- [ ] timestamp for date created and due date
+- [ ] sort by due date
+
+* My spins planning:
+* add timestamps for date created and due date using datepicker plug-in ~ 2 hour
+* sort notes by due date by clicking "due date" column header ~ 5 hours
+
