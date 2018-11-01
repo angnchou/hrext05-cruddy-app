@@ -4,12 +4,26 @@
     <title>HREXT05 Cruddy App</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="app.js"></script>
-    <link rel="stylesheet" href="app.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js""></script>
+
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <input type="text" class="text-input" id="theKey" placeholder="Enter some text">
+    <input type="text" class="text-input" id="theTitle" placeholder="title">
+    <textarea class="user-input-body" id="theNote" placeholder="Enter note here"></textarea>
+    <input type="text" id="datepicker" placeholder="Set due date">
     <button class="add-text-btn">Add text</button>
     <button class="clear-cache-btn">Clear Entries</button>
+    <button class="edit-complete">Update</button>
     <div class="show-text"></div>
+    <table class="display">
+      <tr id="titles">
+        <th>Date</th>
+        <th id="sortDate">Due Date</th>
+        <th>Title</th>
+        <th>Note</th>
+      </tr>
+    </table>
   </body>
 </html>

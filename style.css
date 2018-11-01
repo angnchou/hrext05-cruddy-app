@@ -1,0 +1,15 @@
+.ui-datepicker {
+  background: lightgrey;
+}
+
+td {
+  padding: 0 1em;
+}
+
+table {
+  margin-top: 30px;
+}
+
+#titles th{
+  border: 1px solid black;
+}
