@@ -50,7 +50,7 @@ $(".add-text-btn").on("click", function(){
   var itemObject = {
     'title': curTextValue,
     'body' : curKeyValue,
-    //'status': itemStatus,
+    'status': "",
     'dateCreated': timeCreated,
     'dateDue' : dueDate
   }
@@ -88,7 +88,10 @@ $(".add-text-btn").on("click", function(){
 
   function displayItem(item, index) {
     var displayItem = $("<tr class='display-item' data-storage-key='"+ index + "' >");
-    var td = $('<td><input type="checkbox"></td>');
+    // var td = $('<td><input type="checkbox"></td>');
+    var itemStatus = getItemStatus();
+    var td = $('<td></td>').append(itemStatus); //individual edit or delete
+
     displayItem.append(td);
     // itemStatus = getItemStatus();
     td = $(`<td>${item.dateCreated}</td>`);
@@ -102,10 +105,13 @@ $(".add-text-btn").on("click", function(){
 
     td = $(`<td>${item.body}</td>`);
     displayItem.append(td);
+
+
     
     console.log(displayItem);
-    $('.show-text').append(displayItem);
-    $('.display').append($(".show-text"));
+    
+    $('.display').append(displayItem);
+    $('.show-text').append($('.display'));
   }
 
   
@@ -122,7 +128,19 @@ $(".add-text-btn").on("click", function(){
   //   renderDisplay(); //this re-renders the DOM
   // }
 
+  function getItemStatus() {
+    return $('<select class="itemStatus">' + 
+      '<option value="edit">Edit</option>' + 
+      '<option value="delete">Delete</option>' + 
+      '</select>')
+      .on('change', setStatus);
+  }
 
+  function setStatus() {
+    $('.itemStatus >option[value="delete"]').remove();
+  }
+
+  //$("#cmbTaxIds >option[value='3']").remove();
 
 
   // remove item from app
