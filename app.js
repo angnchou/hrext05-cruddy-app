@@ -4,13 +4,11 @@ update text in local storage (with key)
 update display with new text value
 
 
- <body>
-    <input type="text" class="text-input" id="theKey" placeholder="Enter some text">
-    <button class="add-text-btn">Add text</button>
-    <button class="clear-cache-btn">Clear Entries</button>
-    <button class="edit-complete">Update</button>
-    <div class="show-text"></div>
-  </body>
+Bugs:
+edit and delete dropdown options only work for the first row
+save and add note buttons both add all existing rows and new row
+
+
 
  */
 
@@ -28,7 +26,7 @@ $(document).ready(function(){
   
 
   var dueDate = "";
-  $( "#datepicker" ).datepicker({
+  $( ".datepicker" ).datepicker({
     onSelect: function(userDate){
       dueDate = userDate;
     }
@@ -38,6 +36,7 @@ $(document).ready(function(){
 // add event listener to add note
 $(".add-text-btn").on("click", function(){
   $(".show-text").empty();
+
   var curTextValue = $('#theTitle').val(); // reading from <input> for title
   var curKeyValue = $('#theNote').val(); // reading from <input> for note
 
@@ -50,69 +49,67 @@ $(".add-text-btn").on("click", function(){
   var itemObject = {
     'title': curTextValue,
     'body' : curKeyValue,
-    'status': "",
+    //'status': "",
     'dateCreated': timeCreated,
     'dateDue' : dueDate
   }
 
   allData.push(itemObject);
 
+  renderDisplay(allData);
+
   updateLocalStorage();
 
   console.log(allData)
-  renderDisplay(allData);
-
 });
 
  //write a function that updates localStorage
-  function updateLocalStorage() {
-    localStorage.setItem(myKey, JSON.stringify(allData));
-  }
+function updateLocalStorage() {
+  localStorage.setItem(myKey, JSON.stringify(allData));
+}
 
 
   //remove everything on page and display all items in localStorage at page reload
   //renderDisplay(jsonFromStorage)
 
-  function renderDisplay(data) {
-    data.forEach(function(item, index) {
-      displayItem(item, index);
-    });
-  }
+function renderDisplay(data) {
+  //$(".show-text").empty();
+  data.forEach(function(item, index) {
+    displayItem(item, index);
+  });
+}
 
 
-  renderDisplay(allData);
+renderDisplay(allData);
 
 
 
 
 
-  function displayItem(item, index) {
-    var displayItem = $("<tr class='display-item' data-storage-key='"+ index + "' >");
-    // var td = $('<td><input type="checkbox"></td>');
-    var itemStatus = getItemStatus();
-    var td = $('<td></td>').append(itemStatus); //individual edit or delete
+function displayItem(item, index) {
+  var displayItem = $("<tr class='display-item' data-storage-key='"+ index + "' >");
+  console.log(displayItem);
+  // var td = $('<td><input type="checkbox"></td>');
+  var itemStatus = getItemStatus();
+  var td = $('<td></td>').append(itemStatus); //individual edit or delete
 
-    displayItem.append(td);
-    // itemStatus = getItemStatus();
-    td = $(`<td>${item.dateCreated}</td>`);
-    displayItem.append(td);
+  displayItem.append(td);
 
-    td = $ (`<td>${item.dateDue}</td>`);
-    displayItem.append(td);
- 
-    td = $(`<td>${item.title}</td>`);
-    displayItem.append(td);
+  td = $(`<td class="dateCreated">${item.dateCreated}</td>`);
+  displayItem.append(td);
 
-    td = $(`<td>${item.body}</td>`);
-    displayItem.append(td);
+  td = $ (`<td class="dateDue">${item.dateDue}</td>`);
+  displayItem.append(td);
 
+  td = $(`<td class="title">${item.title}</td>`);
+  displayItem.append(td);
 
-    
-    console.log(displayItem);
-    
-    $('.display').append(displayItem);
-    $('.show-text').append($('.display'));
-  }
+  td = $(`<td class="body">${item.body}</td>`);
+  displayItem.append(td);
+  
+  $('.display').append(displayItem);
+  //$('.show-text').append($('.display'));
+}
 
   
   // function renderDisplay(jsonObject) {
@@ -130,26 +127,105 @@ $(".add-text-btn").on("click", function(){
 
   function getItemStatus() {
     return $('<select class="itemStatus">' + 
-      '<option value="edit">Edit</option>' + 
-      '<option value="delete">Delete</option>' + 
+      '<option class="blank" value="blank"></option>' +
+      '<option class="edit" value="edit">Edit</option>' + 
+      '<option class="delete" value="delete">Delete</option>' + 
       '</select>')
       .on('change', setStatus);
   }
 
   function setStatus() {
-    $('.itemStatus >option[value="delete"]').remove();
-  }
+    //if delete is selected from dropdown, remove from DOM and splice from allData
+      //update local storage
+    if ($('.delete').prop('selected')) {
+      $(this).parent().parent().remove();
+      var indexStored = $(this).parent().parent().attr('data-storage-key');
+      allData.splice(indexStored, 1);
+      updateLocalStorage(allData);
+    }
+    if ($('.edit').prop('selected')) {
 
-  //$("#cmbTaxIds >option[value='3']").remove();
+      var tr = $(this).parents('tr.display-item');
+
+      var currentTitle = $('.title', tr).val();
+      var newTitle = $('.title', tr).html('<input type="text" class="input-title"/>')
+      $('.input-title').attr('placeholder', currentTitle);
+      
+      
+      var currentBody = $('.body', tr).val();
+      var newBody = $('.body', tr).html('<input type="text" class="input-body"/>')
+      $('.input-body').attr('placeholder', currentBody);
+
+
+      var timeCreated = moment(new Date()).format('L');
+      var currentDate = timeCreated;
+
+
+      var currentDueDate = $('.dateDue', tr).val();
+      var newDueDate = $('.dateDue', tr).html('<input type="text" class="input-dateDue"/>')
+      // $('.input-dateDue').attr('placeholder', currentDueDate);
+      newDueDate.addClass('datepicker'); 
+      newDueDate.datepicker({
+        onSelect: function(userDate){
+          dueDate = userDate;
+        }
+      });     
+
+      var indexStored = $(this).parent().parent().attr('data-storage-key');
+
+      $(this).closest('tr').append($('<button class="save">Save</button>').on('click', function() {
+        var updatedTitle = $('.input-title').val();
+        var updatedBody = $('.input-body').val();
+
+        var newItem = {
+          'title': updatedTitle,
+          'body' : updatedBody,
+          'dateCreated': currentDate,
+          'dateDue' : dueDate
+        }
+        
+        allData[indexStored] = newItem;
+
+        updateLocalStorage(allData);
+        renderDisplay(allData);
+        $(this).remove();
+      }));      
+    }
+  }
 
 
   // remove item from app
 
   // listen for click event (del)
   $(".clear-cache-btn").on("click", function(){
-    // clear local storage
-    localStorage.clear();
+      // clear local storage
+      //localStorage.clear();
+      localStorage.removeItem(myKey);
+      $(".show-text").empty();
+  });
+
+
+  //sortDate
+  //if a and b both don't have due date set, sort by title
+  //if only b is missing due date, a should appear at the top of the sort
+  $("#sortDate").on("click", function() {
+    allData.sort(function(a, b) {
+      if(a.dateDue === undefined || a.dateDue === "" || a.dateDue === null) {
+        if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
+          return a.title.localeCompare(b.title);
+        }
+        return 1;
+      }
+      if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
+          return -1;
+      }
+      return a.dateDue.localeCompare(b.dateDue);
+    });
     $(".show-text").empty();
+    console.log(allData)
+
+    updateLocalStorage();
+    renderDisplay(allData)
   });
 
 });
