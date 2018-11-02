@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>HREXT05 Cruddy App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="app.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -12,18 +14,23 @@
   <body>
     <input type="text" class="text-input" id="theTitle" placeholder="title">
     <textarea class="user-input-body" id="theNote" placeholder="Enter note here"></textarea>
-    <input type="text" id="datepicker" placeholder="Set due date">
-    <button class="add-text-btn">Add text</button>
-    <button class="clear-cache-btn">Clear Entries</button>
-    <button class="edit-complete">Update</button>
-    <div class="show-text"></div>
-    <table class="display">
-      <tr id="titles">
-        <th>Date</th>
-        <th id="sortDate">Due Date</th>
-        <th>Title</th>
-        <th>Note</th>
-      </tr>
-    </table>
+    <input type="text" class="datepicker" placeholder="Set due date">
+    <div>
+      <button class="add-text-btn">Add Note</button>
+      <button class="clear-cache-btn">Clear All!</button>
+    </div>
+    <div class="show-text" ></div>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr id="titles">
+          <th></th>
+          <th>Date</th>
+          <th id="sortDate">Due Date</th>
+          <th>Title</th>
+          <th>Note</th>
+        </tr></thead>
+        <tbody class="display"></tbody>
+      </table>
+    </div>
   </body>
 </html>

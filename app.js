@@ -5,12 +5,14 @@ update display with new text value
 
 
 Bugs:
-edit and delete dropdown options only work for the first row
 save and add note buttons both add all existing rows and new row
 
+edit and delete dropdown options only work for the first row
+Clear entries does not clear
 
 
- */
+
+*/
 
 $(document).ready(function(){
   console.log("before\n", window.localStorage);
@@ -23,7 +25,6 @@ $(document).ready(function(){
     allData = [];
   }
 
-  
 
   var dueDate = "";
   $( ".datepicker" ).datepicker({
@@ -35,7 +36,7 @@ $(document).ready(function(){
 
 // add event listener to add note
 $(".add-text-btn").on("click", function(){
-  $(".show-text").empty();
+  $(".display").empty();
 
   var curTextValue = $('#theTitle').val(); // reading from <input> for title
   var curKeyValue = $('#theNote').val(); // reading from <input> for note
@@ -56,39 +57,41 @@ $(".add-text-btn").on("click", function(){
 
   allData.push(itemObject);
 
+  updateLocalStorage(allData);
+
   renderDisplay(allData);
 
-  updateLocalStorage();
-
   console.log(allData)
+  curTextValue = $('#theTitle').val(""); // reading from <input> for title
+  curKeyValue = $('#theNote').val("");
 });
 
  //write a function that updates localStorage
-function updateLocalStorage() {
-  localStorage.setItem(myKey, JSON.stringify(allData));
+ function updateLocalStorage(data) {
+  localStorage.setItem(myKey, JSON.stringify(data));
 }
 
 
   //remove everything on page and display all items in localStorage at page reload
   //renderDisplay(jsonFromStorage)
 
-function renderDisplay(data) {
-  //$(".show-text").empty();
-  data.forEach(function(item, index) {
-    displayItem(item, index);
-  });
-}
+  function renderDisplay(data) {
+    $(".display").empty();
+    data.forEach(function(item, index) {
+      displayItem(item, index);
+    });
+  }
 
 
-renderDisplay(allData);
+  renderDisplay(allData);
 
 
 
 
 
-function displayItem(item, index) {
-  var displayItem = $("<tr class='display-item' data-storage-key='"+ index + "' >");
-  console.log(displayItem);
+  function displayItem(item, index) {
+    var displayItem = $("<tr class='display-item' data-storage-key='"+ index + "' >");
+    console.log(displayItem);
   // var td = $('<td><input type="checkbox"></td>');
   var itemStatus = getItemStatus();
   var td = $('<td></td>').append(itemStatus); //individual edit or delete
@@ -111,7 +114,7 @@ function displayItem(item, index) {
   //$('.show-text').append($('.display'));
 }
 
-  
+
   // function renderDisplay(jsonObject) {
   //   //clear .show-text
   //   //iterate over jsonObject
@@ -131,41 +134,56 @@ function displayItem(item, index) {
       '<option class="edit" value="edit">Edit</option>' + 
       '<option class="delete" value="delete">Delete</option>' + 
       '</select>')
-      .on('change', setStatus);
+    .on('change', setStatus);
   }
 
-  function setStatus() {
+  function setStatus(event) {
+
     //if delete is selected from dropdown, remove from DOM and splice from allData
       //update local storage
-    if ($('.delete').prop('selected')) {
-      $(this).parent().parent().remove();
-      var indexStored = $(this).parent().parent().attr('data-storage-key');
-      allData.splice(indexStored, 1);
-      updateLocalStorage(allData);
-    }
-    if ($('.edit').prop('selected')) {
+      var buttonValue = $(event.target).val();
 
-      var tr = $(this).parents('tr.display-item');
+      switch (buttonValue){
+        case "blank": 
+        renderDisplay(allData);
+        break;
 
-      var currentTitle = $('.title', tr).val();
-      var newTitle = $('.title', tr).html('<input type="text" class="input-title"/>')
-      $('.input-title').attr('placeholder', currentTitle);
+        case "delete":
+        var tr = $(event.target).parents('tr.display-item'); //finding the row
+        var indexStored = tr.attr('data-storage-key');
+        allData.splice(indexStored, 1);
+        updateLocalStorage(allData);
+        tr.remove(); //remove row after getting index to update localStorage
+        break;
+
+        case "edit":
+        var tr = $(event.target).parents('tr.display-item');
+
+        var tdTitle = tr.find('td.title');
+        var currentTitle = tdTitle.text();
+        var newTitle = tdTitle.html(`<input type="text" class="input-title" value="${currentTitle}"/>`)
+      //$('.input-title').attr('placeholder', currentTitle);
       
-      
-      var currentBody = $('.body', tr).val();
-      var newBody = $('.body', tr).html('<input type="text" class="input-body"/>')
-      $('.input-body').attr('placeholder', currentBody);
+      var tdBody = tr.find('td.body');
+      var currentBody = tdBody.text();
+      tdBody.html(`<input type="text" class="input-body" value="${currentBody}"/>`)
+
+      // var tdBody = $('.body', tr).val();
+      // var newBody = $('.body', tr).html(`<input type="text" class="input-title" value="${currentTitle}"/>`)
+      // $('.input-body').attr('placeholder', currentBody);
 
 
       var timeCreated = moment(new Date()).format('L');
       var currentDate = timeCreated;
 
+      var tdDate = tr.find('td.dateDue');
+      var currentDueDate = tdDate.text();
 
-      var currentDueDate = $('.dateDue', tr).val();
-      var newDueDate = $('.dateDue', tr).html('<input type="text" class="input-dateDue"/>')
+
+      var newDueDate = tdDate.html(`<input type="text" class="datepicker input-dateDue" value="${currentDueDate}"/>`)
       // $('.input-dateDue').attr('placeholder', currentDueDate);
-      newDueDate.addClass('datepicker'); 
-      newDueDate.datepicker({
+      tr.find('.datepicker').datepicker("setDate", "11/02/2018").datepicker(
+      {
         onSelect: function(userDate){
           dueDate = userDate;
         }
@@ -183,15 +201,90 @@ function displayItem(item, index) {
           'dateCreated': currentDate,
           'dateDue' : dueDate
         }
-        
+
         allData[indexStored] = newItem;
 
         updateLocalStorage(allData);
-        renderDisplay(allData);
+
+        renderDisplay(allData); //cannot save one at a time yet
+
         $(this).remove();
-      }));      
+      })); 
+      break;
+
+      default://should never be here
+      break;
     }
   }
+
+    // if (buttonValue === 'blank') {
+    //   renderDisplay(allData);
+    // }
+
+    // if (buttonValue === 'delete') {
+
+    //   var tr = $(event.target).parents('tr.display-item'); //finding the row
+    //   var indexStored = tr.attr('data-storage-key');
+    //   allData.splice(indexStored, 1);
+    //   updateLocalStorage(allData);
+    //   tr.remove(); //remove row after getting index to update localStorage
+    // }
+    // if (buttonValue === 'edit') {
+
+    //   var tr = $(event.target).parents('tr.display-item');
+
+    //   var tdTitle = tr.find('td.title');
+    //   var currentTitle = tdTitle.text();
+    //   var newTitle = tdTitle.html(`<input type="text" class="input-title" value="${currentTitle}"/>`)
+    //   //$('.input-title').attr('placeholder', currentTitle);
+
+    //   var tdBody = tr.find('td.body');
+    //   var currentBody = tdBody.text();
+    //   tdBody.html(`<input type="text" class="input-body" value="${currentBody}"/>`)
+
+    //   // var tdBody = $('.body', tr).val();
+    //   // var newBody = $('.body', tr).html(`<input type="text" class="input-title" value="${currentTitle}"/>`)
+    //   // $('.input-body').attr('placeholder', currentBody);
+
+
+    //   var timeCreated = moment(new Date()).format('L');
+    //   var currentDate = timeCreated;
+
+    //   var tdDate = tr.find('td.dateDue');
+    //   var currentDueDate = tdDate.text();
+
+
+    //   var newDueDate = tdDate.html(`<input type="text" class="datepicker input-dateDue" value="${currentDueDate}"/>`)
+    //   // $('.input-dateDue').attr('placeholder', currentDueDate);
+    //   tr.find('.datepicker').datepicker("setDate", "11/02/2018").datepicker(
+    //   {
+    //     onSelect: function(userDate){
+    //       dueDate = userDate;
+    //     }
+    //   });     
+
+    //   var indexStored = $(this).parent().parent().attr('data-storage-key');
+
+    //   $(this).closest('tr').append($('<button class="save">Save</button>').on('click', function() {
+    //     var updatedTitle = $('.input-title').val();
+    //     var updatedBody = $('.input-body').val();
+
+    //     var newItem = {
+    //       'title': updatedTitle,
+    //       'body' : updatedBody,
+    //       'dateCreated': currentDate,
+    //       'dateDue' : dueDate
+    //     }
+
+    //     allData[indexStored] = newItem;
+
+    //     updateLocalStorage(allData);
+
+    //     renderDisplay(allData); //cannot save one at a time yet
+
+    //     $(this).remove();
+    //   }));      
+
 
 
   // remove item from app
@@ -199,33 +292,36 @@ function displayItem(item, index) {
   // listen for click event (del)
   $(".clear-cache-btn").on("click", function(){
       // clear local storage
-      //localStorage.clear();
-      localStorage.removeItem(myKey);
-      $(".show-text").empty();
-  });
+      localStorage.clear();
+      //localStorage.removeItem(myKey);
+      $(".display-item").empty();
+      allData = [];
+
+    });
 
 
   //sortDate
   //if a and b both don't have due date set, sort by title
   //if only b is missing due date, a should appear at the top of the sort
-  $("#sortDate").on("click", function() {
-    allData.sort(function(a, b) {
-      if(a.dateDue === undefined || a.dateDue === "" || a.dateDue === null) {
-        if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
-          return a.title.localeCompare(b.title);
-        }
-        return 1;
-      }
-      if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
-          return -1;
-      }
-      return a.dateDue.localeCompare(b.dateDue);
-    });
-    $(".show-text").empty();
-    console.log(allData)
+$('#sortDate').css('cursor', 'pointer'); //changes mouseover cursor to a hand
 
-    updateLocalStorage();
-    renderDisplay(allData)
+$("#sortDate").on("click", function() {
+  allData.sort(function(a, b) {
+    if(a.dateDue === undefined || a.dateDue === "" || a.dateDue === null) {
+      if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
+        return a.title.localeCompare(b.title);
+      }
+      return 1;
+    }
+    if (b.dateDue === undefined || b.dateDue === "" || b.dateDue === null) {
+      return -1;
+    }
+    return a.dateDue.localeCompare(b.dateDue);
   });
+  $(".show-text").empty();
+
+  updateLocalStorage(allData);
+  renderDisplay(allData)
+});
 
 });
