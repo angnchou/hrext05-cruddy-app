@@ -10,19 +10,14 @@ table {
   margin-top: 30px;
 }
 
-#titles th{
-
-}
-
 body {
   font-style: helvetica;
   margin: 20px 20px 20px 20px;
-  
 }
 
 th, td {
     padding: 10px;
-    text-align: center;
+    text-align: left;
     border-bottom: 1px dashed lightgrey;
 }
 

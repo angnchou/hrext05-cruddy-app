@@ -64,6 +64,7 @@ $(".add-text-btn").on("click", function(){
   console.log(allData)
   curTextValue = $('#theTitle').val(""); // reading from <input> for title
   curKeyValue = $('#theNote').val("");
+  $('.datepicker').val("");
 });
 
  //write a function that updates localStorage
@@ -107,6 +108,9 @@ $(".add-text-btn").on("click", function(){
   td = $(`<td class="title">${item.title}</td>`);
   displayItem.append(td);
 
+  // <pre> and <code> to preserve formatting for code snippets
+  //td = $(`<td class="body"><pre><code><blockquote> ${item.body}</pre></code></blockquote></td>`);
+ 
   td = $(`<td class="body">${item.body}</td>`);
   displayItem.append(td);
   
@@ -292,11 +296,15 @@ $(".add-text-btn").on("click", function(){
   // listen for click event (del)
   $(".clear-cache-btn").on("click", function(){
       // clear local storage
-      localStorage.clear();
+      if (!confirm('Are you sure you want to delete all?')) {
+        return false;
+      } else {
+        localStorage.clear();
       //localStorage.removeItem(myKey);
-      $(".display-item").empty();
-      allData = [];
-
+        $(".display").empty();
+        //renderDisplay(allData);
+        allData = [];
+      }
     });
 
 
